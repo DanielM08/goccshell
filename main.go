@@ -9,15 +9,34 @@ import (
 )
 
 func main() {
-	fmt.Print("ccsh>")
+	for {
+		fmt.Print("ccsh> ")
 
-	reader := bufio.NewReader(os.Stdin)
-	input, _ := reader.ReadString('\n')
-	input = strings.TrimSpace(input)
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
 
-	cmd := exec.Command(input)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+		if input == "" {
+			continue
+		}
 
-	cmd.Run()
+		parts := strings.Fields(input)
+
+		var command = parts[0]
+		var args = parts[1:]
+
+		if command == "exit" {
+			os.Exit(0)
+		}
+
+		cmd := exec.Command(command, args...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		err := cmd.Run()
+
+		if err != nil {
+			fmt.Println("No such file or directory (os error 2)")
+		}
+	}
 }
