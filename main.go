@@ -43,16 +43,7 @@ func main() {
 			continue
 		}
 
-		if len(commandsExecList) == 1 {
-			cmd := commandsExecList[0]
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-
-			err = cmd.Run()
-
-		} else {
-			executePipedCommands(commandsExecList)
-		}
+		executePipedCommands(commandsExecList)
 
 		if err != nil {
 			fmt.Printf("%v\n", err)
@@ -62,8 +53,6 @@ func main() {
 
 func executeCommand(input string) (error, *exec.Cmd) {
 	parts := strings.Fields(input)
-
-	var err error
 
 	var command = parts[0]
 	var args = parts[1:]
@@ -76,36 +65,16 @@ func executeCommand(input string) (error, *exec.Cmd) {
 		if len(args) == 0 {
 			return nil, nil
 		}
-
+		dir := args[0]
 		if args[0] == "~" {
-			dir, _ := os.UserHomeDir()
-			err = os.Chdir(dir)
-
-			if err != nil {
-				return nil, nil
-			}
-
-			return nil, nil
+			dir, _ = os.UserHomeDir()
 		}
 
-		err := os.Chdir(args[0])
-
-		if err != nil {
-			return err, nil
-		}
-
-		return nil, nil
+		err := os.Chdir(dir)
+		return err, nil
 	}
 
 	cmd := exec.Command(command, args...)
-	// cmd.Stdout = os.Stdout
-	// cmd.Stderr = os.Stderr
-
-	// err = cmd.Run()
-
-	// if err != nil {
-	// 	return err, nil
-	// }
 
 	return nil, cmd
 }
