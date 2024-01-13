@@ -21,12 +21,36 @@ func main() {
 		}
 
 		parts := strings.Fields(input)
-
 		var command = parts[0]
 		var args = parts[1:]
 
 		if command == "exit" {
 			os.Exit(0)
+		}
+
+		if command == "cd" {
+			if len(args) == 0 {
+				continue
+			}
+
+			if args[0] == "~" {
+				dir, _ := os.UserHomeDir()
+				err := os.Chdir(dir)
+
+				if err != nil {
+					fmt.Printf("%v\n", err)
+				}
+
+				continue
+			}
+
+			err := os.Chdir(args[0])
+
+			if err != nil {
+				fmt.Printf("%v\n", err)
+			}
+
+			continue
 		}
 
 		cmd := exec.Command(command, args...)
@@ -36,7 +60,7 @@ func main() {
 		err := cmd.Run()
 
 		if err != nil {
-			fmt.Println("No such file or directory (os error 2)")
+			fmt.Println(err)
 		}
 	}
 }
