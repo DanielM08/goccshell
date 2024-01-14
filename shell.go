@@ -15,6 +15,7 @@ type Shell struct {
 
 func (s *Shell) execute() {
 	signal.Ignore(os.Interrupt)
+	s.newHistory()
 
 	for {
 		fmt.Print("ccsh> ")
@@ -27,7 +28,7 @@ func (s *Shell) execute() {
 			continue
 		}
 
-		s.saveHistory(input)
+		s.addCommand(input)
 
 		commandsSequence := strings.Split(input, "|")
 
@@ -56,7 +57,7 @@ func (s *Shell) execute() {
 	}
 }
 
-func (c *Shell) getCommandExecutor(input string) (error, *exec.Cmd) {
+func (s *Shell) getCommandExecutor(input string) (error, *exec.Cmd) {
 	input = strings.TrimSpace(input)
 	parts := strings.Fields(input)
 
@@ -81,13 +82,11 @@ func (c *Shell) getCommandExecutor(input string) (error, *exec.Cmd) {
 	}
 
 	if command == "history" {
-		err, history := c.getCommandsHistory()
+		history := s.getHistory()
 
-		if err != nil {
-			return err, nil
+		for i, hc := range history {
+			fmt.Printf("%d: %s\n", i, hc)
 		}
-
-		fmt.Println(history)
 
 		return nil, nil
 	}

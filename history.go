@@ -2,57 +2,41 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
+	"path/filepath"
 )
 
 type CommandHistory struct {
-	historyFilePath string
+	commands []string
+	file     *os.File
 }
 
 func (ch *CommandHistory) getHistoryPath() string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	return home + "/.ccsh_history"
+	home, _ := os.UserHomeDir()
+
+	return filepath.Join(home, ".ccsh_history")
 }
 
-func (ch *CommandHistory) saveHistory(input string) {
+func (ch *CommandHistory) newHistory() {
 	var historyPath = ch.getHistoryPath()
-	file, err := os.OpenFile(historyPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(input + "\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-}
-
-func (ch *CommandHistory) getCommandsHistory() (error, string) {
-	var historyPath = ch.getHistoryPath()
-	file, err := os.Open(historyPath)
-	if err != nil {
-		return err, ""
-	}
-	defer file.Close()
+	file, _ := os.OpenFile(historyPath, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0600)
 
 	scanner := bufio.NewScanner(file)
-	var history string
-	var prevLine string
-	for scanner.Scan() {
-		if prevLine != "" {
-			history += prevLine + "\n"
-		}
-		prevLine = scanner.Text()
-	}
-	history += prevLine
+	scanner.Split(bufio.ScanLines)
 
-	return nil, history
+	var history []string
+	for scanner.Scan() {
+		history = append(history, scanner.Text())
+	}
+
+	ch.commands = history
+}
+
+func (ch *CommandHistory) addCommand(input string) {
+	ch.commands = append(ch.commands, input)
+	ch.file.WriteString(input + "\n")
+}
+
+func (ch *CommandHistory) getHistory() []string {
+	return ch.commands
 }
