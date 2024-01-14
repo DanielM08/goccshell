@@ -20,18 +20,14 @@ func main() {
 			continue
 		}
 
-		commandsList := strings.Split(input, "|")
+		commandsSequence := strings.Split(input, "|")
 
 		var commandsExecList []*exec.Cmd = []*exec.Cmd{}
 		var err error
-		for _, commandInput := range commandsList {
-			err, command := executeCommand(commandInput)
+		for _, commandInput := range commandsSequence {
+			err, command := getCommandExecutor(commandInput)
 
-			if err != nil {
-				break
-			}
-
-			if command == nil {
+			if err != nil || command == nil {
 				break
 			}
 
@@ -43,7 +39,7 @@ func main() {
 			continue
 		}
 
-		executePipedCommands(commandsExecList)
+		err = executePipedCommands(commandsExecList)
 
 		if err != nil {
 			fmt.Printf("%v\n", err)
@@ -51,7 +47,8 @@ func main() {
 	}
 }
 
-func executeCommand(input string) (error, *exec.Cmd) {
+func getCommandExecutor(input string) (error, *exec.Cmd) {
+	input = strings.TrimSpace(input)
 	parts := strings.Fields(input)
 
 	var command = parts[0]
@@ -111,7 +108,9 @@ func executePipedCommands(commandsExecList []*exec.Cmd) error {
 		err := cmd.Wait()
 
 		if err != nil {
-			return err
+			if cmd.ProcessState.ExitCode() == -1 {
+				return fmt.Errorf("Command not found: %s", cmd.Path)
+			}
 		}
 	}
 
