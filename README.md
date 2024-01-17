@@ -16,9 +16,12 @@ Our command line shell supports:
 5) Handle signals that could interrupt the shell (e.g., Ctrl + C).
 6) The "history" command.
 
+## Running the project
+
+In the project directory, run ```go run .```
+
 ## Project Evolution
 
 1) Add support for running a historic command (ex: allowing the use of the up and down arrows)
 2) Support variable expansion. (ex: pressing tab)
 3) Handle scripting
-
